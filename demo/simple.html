@@ -1,0 +1,106 @@
+<!doctype html>
+<head>
+    <script src="../../DefineProperty.polyfill/defineProperty.polyfill.js"></script>
+    <script src="../../Array.observe/Array.observe.js"></script>
+    <script src="../Bind.js"></script>
+</head>
+<body>
+    <div id='textContent'></div>
+    <div id='parent'>
+        <div id='child'></div>
+    </div>
+    <div id='attributes'></div>
+    <div id='dataset'></div>
+    <div id='elementObject'>
+        <div id="nestScope">
+            <div id="objectChild"></div>
+            <div id="objectChild2"></div>
+            <div id="objectChild3"></div>
+        </div>
+    </div>
+    <div class='elementArray'>
+        <div class="arrayChild">elementArray</div>
+    </div>
+<div id='elementBoolean'></div>
+<div id='elementNumber'></div>
+<script>
+/*
+Bind(Element, 'attribute', object, 'property');
+Bind.bind = function(element, attribute, object, property){
+    if(name == 'myBinding'){
+    }else Bind.prototype.bind.call(this, element, attribute, object, property);
+}
+*/
+var data ={
+    textContent : {
+        path    : [{
+            to  : [{
+                value : 'content'
+            }]
+        }]
+    },
+    attributes  : {
+        id      : 'value',
+        class   : ['class1', 'class2'],
+        style   : {
+            display : 'none'
+        }
+    },
+    dataset     : {
+        foo     : 'bar'
+    },
+    event       : {
+        click   : function(){
+            console.log('click')
+        }
+    },
+    arr     : [1,2,3,4],
+    bool    : true,
+    num     : 90,
+    func    : function(){
+        //observe(target, callback);
+    }
+};
+var $   = function(selector){
+    return document.querySelector(selector);
+}
+//basic usage for exit attribute
+Bind($('#textContent'), 'textContent', data.textContent, 'path[0].to[0].value');//bind textContent
+//Bind($('#textContent2'), 'textContent', data.textContent.path[0].to[0], 'value');//the same as above
+////Bind($('#visibility'), 'visibility', data, 'visibility');//bind visibility to boolean
+//Bind($('#attributesId'), 'attributes.id', data.attributes, 'id');//bind attribute to value
+//Bind($('#attributesClass'), 'attributes.class', data.attributes, 'class');//bind attribute to Array will render to "display: block;"
+//Bind($('#attributesStyle'), 'attributes.style', data.attributes, 'style');//bind attribute to Object will render to "display: block;"
+//Bind($('#attributesStyleTop'), 'attributes.style.top', data.attributes.style, 'top');//bind attribute top
+//Bind($('#dataset'), 'dataset.data', data.dataset, 'foo');//bind dataset
+//
+////added attribute event
+//Bind($('#event'), 'event.click', data.event, 'click');//bind event
+//Bind($('#event'), 'event.webkitTransitionEnd', data.event, 'webkitTransitionEnd');//bind event with prefix ignore when event is undefined
+//Bind($('#event'), 'event.mozTransitionEnd', data.event, 'mozTransitionEnd');//bind event with prefix ignore when event is undefined
+//Bind($('#event'), 'event.oTransitionEnd', data.event, 'oTransitionEnd');//bind event with prefix ignore when event is undefined
+//Bind($('#event'), 'event.transitionEnd', data.event, 'transitionEnd');//bind event with prefix ignore when event is undefined
+//
+////added attribute scope
+//Bind($('#scope'), 'scope', data, 'obj');//bind scope
+//Bind($('#scopeItem'), 'textContent', 'path.to.value');//relative bind without object paramater
+//
+////added attribute repeat
+//Bind($('.array'), 'repeat', data, 'arr');//bind repeat, and each repeat element will has a scope of arr[i], and $index is useful
+//Bind($('.arrayItem'), 'textContent', '$index.arr');//bind repeat, and each repeat element will has a scope of arr[i], and $index is useful
+//Bind($('.arrayItem'), 'textContent', '[$index].arr');//the same as above
+//
+////added attribute handle
+//Bind($('#function'), 'handle', data, 'func');//custom bind handle function for select node
+//
+////custom binding
+//Bind.bind = function(element, attribute, object, property){//custom bind for follow use
+//    if(attribute == 'myAttribute'){
+//        //handle
+//    }else Bind.prototype.bind.call(this, element, attribute, object, property);
+//}
+////initial value will first render to data
+//for example span style will first render to data
+</script>
+</body>
+</html>
