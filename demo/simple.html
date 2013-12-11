@@ -2,15 +2,26 @@
 <head>
     <script src="../../DefineProperty.polyfill/defineProperty.polyfill.js"></script>
     <script src="../../Array.observe/Array.observe.js"></script>
-    <script src="../Bind.js"></script>
+    <script src="../Element.bind.js"></script>
 </head>
 <body>
     <div id='textContent'></div>
-    <div id='parent'>
-        <div id='child'></div>
-    </div>
-    <div id='attributes'></div>
+    <div id='textContent2'></div>
+    <div id='textContent3'></div>
+    <div id='attributesId'></div>
+    <div id='attributesClass'></div>
+    <div id='attributesClass2'></div>
+    <div id='attributesStyle'></div>
+    <div id='attributesStyleTop' style="position:relative; width:1em; height:1em; background-color:green;"></div>
+    <div id='attributesCustom'></div>
     <div id='dataset'></div>
+    <div id='scope'>
+        <div id='scopeItem'></div>
+    </div>
+    <div class='array'>
+        <div class='arrayItem'></div>
+        <div class='arrayItem2'>*</div>
+    </div>
     <div id='elementObject'>
         <div id="nestScope">
             <div id="objectChild"></div>
@@ -40,11 +51,20 @@ var data ={
         }]
     },
     attributes  : {
-        id      : 'value',
+        id      : 'initId',
         class   : ['class1', 'class2'],
+        class2  : ['class1', 'class2'],
         style   : {
-            display : 'none'
-        }
+            display         : 'block',
+            position        : 'relative',
+            width           : '1em',
+            height          : '1em',
+            backgroundColor : 'red'
+        },
+        styleTop    : {
+            top : '1em'
+        },
+        custom  : 'value'
     },
     dataset     : {
         foo     : 'bar'
@@ -52,6 +72,13 @@ var data ={
     event       : {
         click   : function(){
             console.log('click')
+        }
+    },
+    scope       : {
+        path    : {
+            to  : {
+                data : 'value'
+            }
         }
     },
     arr     : [1,2,3,4],
@@ -62,45 +89,66 @@ var data ={
     }
 };
 var $   = function(selector){
-    return document.querySelector(selector);
+    return document.querySelectorAll(selector);
 }
-//basic usage for exit attribute
-Bind($('#textContent'), 'textContent', data.textContent, 'path[0].to[0].value');//bind textContent
-//Bind($('#textContent2'), 'textContent', data.textContent.path[0].to[0], 'value');//the same as above
-////Bind($('#visibility'), 'visibility', data, 'visibility');//bind visibility to boolean
-//Bind($('#attributesId'), 'attributes.id', data.attributes, 'id');//bind attribute to value
-//Bind($('#attributesClass'), 'attributes.class', data.attributes, 'class');//bind attribute to Array will render to "display: block;"
-//Bind($('#attributesStyle'), 'attributes.style', data.attributes, 'style');//bind attribute to Object will render to "display: block;"
-//Bind($('#attributesStyleTop'), 'attributes.style.top', data.attributes.style, 'top');//bind attribute top
-//Bind($('#dataset'), 'dataset.data', data.dataset, 'foo');//bind dataset
+////basic usage for exit attribute
+////bind textContent
+//ElementBind($('#textContent'), 'textContent', data.textContent, 'path[0].to[0].value');
+//ElementBind($('#textContent2'), 'textContent', data.textContent.path[0], 'to[0].value');//the same as above
+//ElementBind($('#textContent3'), 'textContent', data.textContent.path[0].to[0], 'value');//the same as above
+////var bindId  = ElementBind($('#textContent3'), 'textContent', data.textContent.path[0].to[0], 'value');//the same as above
+////ElementBind.unbind(bindId)
+////ElementBind($('#visibility'), 'visibility', data, 'visibility');//bind visibility to boolean
+//ElementBind($('#attributesId'), 'attributes.id', data.attributes, 'id');//bind attribute to value
+//ElementBind($('#attributesClass'), 'attributes.class', data.attributes, 'class');//bind attribute to Array will render to "display: block;"
+//ElementBind($('#attributesClass2'), 'attributes.class', data.attributes, 'class2');//bind attribute to Array will render to "display: block;"
+//ElementBind($('#attributesStyle'), 'attributes.style', data.attributes, 'style');//bind attribute to Object will render to "display: block;"
+//ElementBind($('#attributesStyleTop'), 'attributes.style.top', data.attributes.styleTop, 'top');//bind attribute top
+//ElementBind($('#attributesCustom'), 'attributes.custom.define', data.attributes, 'custom');//bind attribute top
+//ElementBind($('#dataset'), 'dataset.data.set.content', data.dataset, 'foo');//bind dataset
 //
 ////added attribute event
-//Bind($('#event'), 'event.click', data.event, 'click');//bind event
-//Bind($('#event'), 'event.webkitTransitionEnd', data.event, 'webkitTransitionEnd');//bind event with prefix ignore when event is undefined
-//Bind($('#event'), 'event.mozTransitionEnd', data.event, 'mozTransitionEnd');//bind event with prefix ignore when event is undefined
-//Bind($('#event'), 'event.oTransitionEnd', data.event, 'oTransitionEnd');//bind event with prefix ignore when event is undefined
-//Bind($('#event'), 'event.transitionEnd', data.event, 'transitionEnd');//bind event with prefix ignore when event is undefined
+////ElementBind($('#event'), 'event.click', data.event, 'click');//bind event
+////ElementBind($('#event'), 'event.webkitTransitionEnd', data.event, 'webkitTransitionEnd');//bind event with prefix ignore when event is undefined
+////ElementBind($('#event'), 'event.mozTransitionEnd', data.event, 'mozTransitionEnd');//bind event with prefix ignore when event is undefined
+////ElementBind($('#event'), 'event.oTransitionEnd', data.event, 'oTransitionEnd');//bind event with prefix ignore when event is undefined
+////ElementBind($('#event'), 'event.transitionEnd', data.event, 'transitionEnd');//bind event with prefix ignore when event is undefined
 //
 ////added attribute scope
-//Bind($('#scope'), 'scope', data, 'obj');//bind scope
-//Bind($('#scopeItem'), 'textContent', 'path.to.value');//relative bind without object paramater
+//ElementBind($('#scope'), 'scope', data, 'scope');//bind scope
+//ElementBind($('#scopeItem'), 'textContent', 'path.to.data');//relative bind without object paramater, scope bind must be first binded
 //
 ////added attribute repeat
-//Bind($('.array'), 'repeat', data, 'arr');//bind repeat, and each repeat element will has a scope of arr[i], and $index is useful
-//Bind($('.arrayItem'), 'textContent', '$index.arr');//bind repeat, and each repeat element will has a scope of arr[i], and $index is useful
-//Bind($('.arrayItem'), 'textContent', '[$index].arr');//the same as above
+ElementBind($('.array'), 'repeat', data, 'arr');//bind repeat, and each repeat element will has a scope of arr[i], and $index is useful
+//ElementBind($('.arrayItem'), 'textContent', '$index');//bind repeat, and each repeat element will has a scope of arr[i], and $index is useful
+ElementBind($('.arrayItem2'), 'textContent', '[$index]');//the same as above
 //
 ////added attribute handle
-//Bind($('#function'), 'handle', data, 'func');//custom bind handle function for select node
+//ElementBind($('#function'), 'handle', data, 'func');//custom bind handle function for select node
 //
 ////custom binding
-//Bind.bind = function(element, attribute, object, property){//custom bind for follow use
+//ElementBind.config.bind = function(element, attribute, object, property){//custom bind for follow use
 //    if(attribute == 'myAttribute'){
 //        //handle
-//    }else Bind.prototype.bind.call(this, element, attribute, object, property);
+//    }else ElementBind.config.prototype.bind.apply(this, arguments);
 //}
 ////initial value will first render to data
 //for example span style will first render to data
+
+//modify data
+setTimeout(function(){
+    //data.textContent.path[0].to[0].value    = 'modify textContent';
+    //data.attributes.id              = 'changeId';
+    //data.attributes.class.push('class3');//failed
+    //data.attributes.class2          = ['c1','c2'];//replace the whole className
+    //data.attributes.style           = {backgroundColor: 'blue'};//only replace inside items
+    //data.attributes.styleTop.top    = '2em';
+    //data.scope.path.to.data         = 'change data';
+    //console.log('settimeout')
+    data.arr[1]                     = 99;
+    data.arr                        = [2,3,5,6,7];
+    data.arr[2]                     = 990;
+},1000);
 </script>
 </body>
 </html>
