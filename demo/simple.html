@@ -6,15 +6,21 @@
 </head>
 <body>
     <div id='textContent'></div>
+    <div id='textContent1'></div>
     <div id='textContent2'></div>
     <div id='textContent3'></div>
     <div id='attributesId'></div>
     <div id='attributesClass'></div>
+    <div id='attributesClass1' class="class0"></div>
     <div id='attributesClass2'></div>
     <div id='attributesStyle'></div>
+    <div id='attributesStyle1'></div>
     <div id='attributesStyleTop' style="position:relative; width:1em; height:1em; background-color:green;"></div>
     <div id='attributesCustom'></div>
+    <input type="text" id='attributesValue'/>
     <div id='dataset'></div>
+    <div id='event'>event</div>
+    <div id='event1'>event1</div>
     <div id='scope'>
         <div id='scopeItem'></div>
     </div>
@@ -30,49 +36,50 @@
         </div>
     </div>
     <div class='elementArray'>
-        <div class="arrayChild">elementArray</div>
+        <div class="arrayChild"></div>
     </div>
 <div id='elementBoolean'></div>
 <div id='elementNumber'></div>
 <script>
-/*
-Bind(Element, 'attribute', object, 'property');
-Bind.bind = function(element, attribute, object, property){
-    if(name == 'myBinding'){
-    }else Bind.prototype.bind.call(this, element, attribute, object, property);
-}
-*/
 var data ={
     textContent : {
         path    : [{
             to  : [{
-                value : 'content'
+                value : 'init content'
             }]
-        }]
+        }],
+        a       : 'a',
+        b       : 'b'
     },
     attributes  : {
         id      : 'initId',
-        class   : ['class1', 'class2'],
+        "class" : {
+            "string"    : 'class1 class2',
+            "array"     : ['class1', 'class2']
+        },
         class2  : ['class1', 'class2'],
         style   : {
-            display         : 'block',
-            position        : 'relative',
-            width           : '1em',
-            height          : '1em',
-            backgroundColor : 'red'
+            "string"    : "display:block; backgroundColor: red; width: 2em; height: 2em;",
+            "object"    : {
+                display         : 'block',
+                position        : 'relative',
+                width           : '1em',
+                height          : '1em',
+                backgroundColor : 'red'
+            }
         },
         styleTop    : {
             top : '1em'
         },
-        custom  : 'value'
+        custom  : 'value',
+        value   : 'input value'
     },
     dataset     : {
         foo     : 'bar'
     },
     event       : {
-        click   : function(){
-            console.log('click')
-        }
+        click   : function(){ console.log('click') },
+        click2  : function(){ console.log('click2') }
     },
     scope       : {
         path    : {
@@ -88,67 +95,388 @@ var data ={
         //observe(target, callback);
     }
 };
+var a   = '$a';
+var b   = '$b';
 var $   = function(selector){
     return document.querySelectorAll(selector);
 }
-////basic usage for exit attribute
-////bind textContent
-//ElementBind($('#textContent'), 'textContent', data.textContent, 'path[0].to[0].value');
-//ElementBind($('#textContent2'), 'textContent', data.textContent.path[0], 'to[0].value');//the same as above
-//ElementBind($('#textContent3'), 'textContent', data.textContent.path[0].to[0], 'value');//the same as above
-////var bindId  = ElementBind($('#textContent3'), 'textContent', data.textContent.path[0].to[0], 'value');//the same as above
-////ElementBind.unbind(bindId)
-////ElementBind($('#visibility'), 'visibility', data, 'visibility');//bind visibility to boolean
-//ElementBind($('#attributesId'), 'attributes.id', data.attributes, 'id');//bind attribute to value
-//ElementBind($('#attributesClass'), 'attributes.class', data.attributes, 'class');//bind attribute to Array will render to "display: block;"
-//ElementBind($('#attributesClass2'), 'attributes.class', data.attributes, 'class2');//bind attribute to Array will render to "display: block;"
-//ElementBind($('#attributesStyle'), 'attributes.style', data.attributes, 'style');//bind attribute to Object will render to "display: block;"
-//ElementBind($('#attributesStyleTop'), 'attributes.style.top', data.attributes.styleTop, 'top');//bind attribute top
-//ElementBind($('#attributesCustom'), 'attributes.custom.define', data.attributes, 'custom');//bind attribute top
-//ElementBind($('#dataset'), 'dataset.data.set.content', data.dataset, 'foo');//bind dataset
-//
-////added attribute event
-////ElementBind($('#event'), 'event.click', data.event, 'click');//bind event
-////ElementBind($('#event'), 'event.webkitTransitionEnd', data.event, 'webkitTransitionEnd');//bind event with prefix ignore when event is undefined
-////ElementBind($('#event'), 'event.mozTransitionEnd', data.event, 'mozTransitionEnd');//bind event with prefix ignore when event is undefined
-////ElementBind($('#event'), 'event.oTransitionEnd', data.event, 'oTransitionEnd');//bind event with prefix ignore when event is undefined
-////ElementBind($('#event'), 'event.transitionEnd', data.event, 'transitionEnd');//bind event with prefix ignore when event is undefined
-//
-////added attribute scope
-//ElementBind($('#scope'), 'scope', data, 'scope');//bind scope
-//ElementBind($('#scopeItem'), 'textContent', 'path.to.data');//relative bind without object paramater, scope bind must be first binded
-//
-////added attribute repeat
-ElementBind($('.array'), 'repeat', data, 'arr');//bind repeat, and each repeat element will has a scope of arr[i], and $index is useful
-//ElementBind($('.arrayItem'), 'textContent', '$index');//bind repeat, and each repeat element will has a scope of arr[i], and $index is useful
-ElementBind($('.arrayItem2'), 'textContent', '[$index]');//the same as above
-//
-////added attribute handle
-//ElementBind($('#function'), 'handle', data, 'func');//custom bind handle function for select node
-//
-////custom binding
-//ElementBind.config.bind = function(element, attribute, object, property){//custom bind for follow use
-//    if(attribute == 'myAttribute'){
-//        //handle
-//    }else ElementBind.config.prototype.bind.apply(this, arguments);
-//}
-////initial value will first render to data
+
+//initial value will first render to data
 //for example span style will first render to data
 
-//modify data
-setTimeout(function(){
-    //data.textContent.path[0].to[0].value    = 'modify textContent';
-    //data.attributes.id              = 'changeId';
-    //data.attributes.class.push('class3');//failed
-    //data.attributes.class2          = ['c1','c2'];//replace the whole className
-    //data.attributes.style           = {backgroundColor: 'blue'};//only replace inside items
-    //data.attributes.styleTop.top    = '2em';
-    //data.scope.path.to.data         = 'change data';
-    //console.log('settimeout')
-    data.arr[1]                     = 99;
-    data.arr                        = [2,3,5,6,7];
-    data.arr[2]                     = 990;
-},1000);
+
+/*document.addEventListener("DOMSubtreeModified", function(e) {
+    // Notify of change!
+    console.warn("change!", e);
+}, false);
+*/
+
+/*
+ * =template repeat use repeatBinding for core function
+<template repeat="{{users}}">
+</template>
+/**/
+
+/*
+@bindings   : [Directive]
+@instances  : [Dom]
+@archetype  : Dom
+@index      : Number
+@Directive  : { path : [Number], type: 'directive name', template : [Template]}
+@Template   : { path : 'path', getter setter}
+
+binding is two way binding, which means if textContent change data will change, and data change event will be triggered.
+how can i solve the circle dead loop?
+
+ for textContent, I use setOriginTextContent function, and set getter setter to element.textContent for a proxy.
+
+ * when textContent change, change data ->  go to next
+ * when data change, call textContentModel2View -> call setOriginTextContent.
+
+*/
+
+/*
+ * = built-in directive
+ * textContent
+ * attribute
+ * dataset
+ * event
+ * scope
+ * repeat
+ */
+
+/*
+ * =textContent directive
+ * @about   most usable directive, {{}} need for template parse, object is the scope of template,
+ *          if it's undefined , it will search the parent element, top is window.
+ * @usage   ElementBind(element(s), 'directive', pathScope, 'template');
+ *
+ElementBind($('#textContent'), 'textContent', data, '{{textContent.path[0].to[0].value}}');
+ElementBind($('#textContent1'), 'textContent', data.textContent, '{{a}} and {{b}} is result');
+ElementBind($('#textContent2'), 'textContent', data.textContent.path[0], '{{to[0].value}}');
+ElementBind($('#textContent3'), 'textContent', data.textContent.path[0].to[0], '{{value}}');
+/**/
+
+
+/*
+ * =attributes directive
+ * @about   it will change the element's attribute,
+ *          if directive is attributes.class and template binding data is Array,
+ *          Array.join(' ') will be called before.
+ *          if directive is attributes.style and template binding data is Object,
+ *          Object will be rendered to "display: block;" like string.
+ *          other attribute will refer to original element.attributes
+ *          always two way binding, multi template will be the same, always match the template.
+ * @usage   ElementBind(element(s), 'directive', pathScope, 'template');
+ *
+ElementBind($('#attributesId'), 'attributes.id', data.attributes, '{{id}}');
+ElementBind($('#attributesClass'), 'attributes.class', data.attributes, '{{class.string}}');
+ElementBind($('#attributesClass1'), 'attributes.class', data.attributes, '{{class.array}}');
+ElementBind($('#attributesClass2'), 'attributes.class', data.attributes, '{{class2}}');
+ElementBind($('#attributesStyle'), 'attributes.style', data.attributes, '{{style.string}}');
+ElementBind($('#attributesStyle1'), 'attributes.style', data.attributes, '{{style.object}}');
+ElementBind($('#attributesStyleTop'), 'attributes.style.top', data.attributes.styleTop, '{{top}}');
+ElementBind($('#attributesCustom'), 'attributes.custom.define', data.attributes, '{{custom}}');
+ElementBind($('#attributesValue'), 'attributes.value', data.attributes, '{{value}}');
+/**/
+
+
+/*
+ * = dataset directive
+ * @about   dataset.data.set.content will point to attribute data-data-set-content
+ * @usage   ElementBind(element(s), directive, pathScope, 'template');
+ *
+ElementBind($('#dataset'), 'dataset.data.set.content', data.dataset, '{{foo}}');
+/**/
+
+
+/*
+ * =event binding
+ * @about   it will bind event and will fixed some problem on different browsers,
+ *          prefix free is supported in directive.
+ *          if property is undefined, absolute event will be binded,
+ *          property is relative.
+ *          target event will be {{}}
+ * @usage   ElementBind(element(s), 'directive', propertyScope, 'property');
+ *
+//ElementBind($('#event'), 'event.click', data.event.click);//not recommend
+ElementBind($('#event1'), 'event.click', data.event, '{{click}}');
+ElementBind($('#event1'), 'event.click', data.event, '{{click}}{{click2}}');
+//ElementBind($('#event'), 'event.transitionEnd', data.event, 'transitionEnd');
+/**/
+
+/*
+ * =scope
+ * @about   it will set model for element, and set element model will trigger scopeBinding,
+ *          if parent element binded a scope, child binding will inhert it.
+ *          it's a invisible directive, so no need for userdefined
+ *          root scope is window.
+ * @usage   scope:  ElementBind(element(s), 'directive', object);
+ *          child:  ElementBind(element(s), 'directive', 'template');
+ *
+ElementBind($('#scope'), 'scope', data.scope);
+ElementBind($('#scopeItem'), 'textContent', '{{path.to.data}}');
+/**/
+
+/*
+ * = repeat
+ * @about   it will repeat the element and bind the child bindings for new element,
+ *          each repeat element will own a scope of data[$index],
+ *          $index in template will be replace with the repeat index,
+ * @usage   ElementBind(element(s), 'directive', pathScope, 'template')
+ *
+ElementBind($('.array'), 'repeat', data, '{{arr}}');
+ElementBind($('.arrayItem'), 'textContent', '{{$index}}');
+ElementBind($('.arrayItem2'), 'textContent', '{{[$index]}}');
+/**/
+
+
+/*
+ * = custom binding
+ *   all directives will turn to call this function
+ *   use for custom directive
+ *
+ElementBind.binding = function(element, directive, object, template){//custom bind for follow use
+    if(directive == 'repeat'){
+        console.log('hi')
+        //handle
+    }else ElementBind.prototype.bind.apply(this, arguments);
+}
+/**/
+
+/*
+ * = unbind
+ * @about   ElementBind will return a binding which can be use in ElementBind.unbind
+ *
+var bindId  = ElementBind($('#unbind'), 'textContent', data.textContent.path[0].to[0], 'value');
+ElementBind.unbind(bindId);
+/**/
+
+
+
+/*
+modify data
+*/
+var i = 0;
+(function(i){
+    setTimeout(function(){
+        //data.textContent.path[0].to[0].value    = 'modify textContent';
+        //data.textContent.a                      = 'a modify';
+        //data.textContent.b                      = 'b modify';
+        //data.attributes.id              = 'changeId';
+        data.attributes.class.string    = 'c1 c2';
+        //data.attributes.class.array.push('class3');
+        //data.attributes.class.array.push('class4');
+        //data.attributes.class.array.pop();
+        //data.attributes.class2          = ['c1','c2'];//replace the whole className
+        data.attributes.style.string    = "backgroundColor: blue";//only replace exist items
+        data.attributes.style.object    = {backgroundColor: 'blue'};//only replace exist items
+        //data.attributes.style.object.backgroundColor    = 'blue';//failed
+        data.attributes.styleTop.top    = '2em';
+        data.attributes.value           = 'modify value';
+        data.dataset.foo                = 'modify bar';
+        //data.scope.path.to.data         = 'change data';
+        //data.arr[1]                     = i+++99;
+        //data.arr                        = [i+++2,i+++3,i+++5,i+++6,i+++7];
+        //data.arr[2]                     = i+++990;
+        //data.arr[3]                     = i+++88;
+        //data.arr[4]                     = i+++11;
+        //data.arr[5]                     = i+++15;
+        //data.arr[6]                     = i+++12;
+    },1000);
+})(i);
+/**/
+/*
+ * =ArrayObserve
+ * @usage   observe array when array has new item
+ * */
+//function ArrayObserve(obj, prop, callback){
+//    /*
+//     * Fast Duff's Device
+//     * @author Miller Medeiros <http://millermedeiros.com> 
+//     * @modify Defims Loong
+//     * @version 0.3 (2010/08/25)
+//     */
+//    function duff(process, iterations){
+//        var n   = iterations % 8,
+//            i   = iterations;
+//        while (n--) process(i--);
+//        n = (iterations * 0.125) ^ 0;
+//        while (n--) {
+//            process(i--);
+//            process(i--);
+//            process(i--);
+//            process(i--);
+//            process(i--);
+//            process(i--);
+//            process(i--);
+//            process(i--);
+//        };
+//    };
+//    //observalbleArray prototype
+//    function ObservableArrayPrototype(){
+//        var MAX             = 10,
+//            fallback        = this,
+//            _array          = [];
+//        //console.time('[i]')
+//        duff(function(i){
+//            i   = i-1;
+//            Object.defineProperty(fallback,i,{//[i] fallback
+//                get: function(){//this item is empty
+//                },
+//                set: function(value){//new item is created
+//                    _array[i] = value;
+//                    var observableArray = this;
+//                    //Object.defineProperty(observableArray,i,{//[i]
+//                    var descriptor  ={//[i]
+//                        get: function(){//get [i]
+//                            try{
+//                                return _array[i];
+//                            }finally{//sync _array and array hook
+//                                (function(observableArray, _array, i){
+//                                    setTimeout(function(){
+//                                        //shift pop ... will modify array.length, and return the delete item.
+//                                        //check if array.length change in getter and knowed if delete.
+//                                        if(observableArray.length < _array.length){//sync _array and observableArray
+//                                            callback.call(observableArray,{
+//                                                "name"      : Number(i),
+//                                                "object"    : observableArray,
+//                                                "type"      : "deleted",
+//                                                "oldValue"     : value
+//                                            })
+//                                            _array.splice(i,1);
+//                                        }
+//                                    },0);
+//                                })(observableArray, _array, i);
+//                            }
+//                        },
+//                        set: function(value){//set [i]
+//                            var oldValue    = _array[i];
+//                            _array[i]       = value;
+//                            callback.call(observableArray,{
+//                                "name"      : Number(i),
+//                                "object"    : observableArray,
+//                                "type"      : "updated",
+//                                "oldValue"  : oldValue,
+//                                "value"     : value
+//                            });
+//                            //detect delete command
+//                        },
+//                        enumerable      : true,
+//                        configurable    : false
+//                    };
+//                    //var configurable    = true;
+//                    //Object.defineProperty(descriptor,'configurable',{
+//                    //    get : function(){
+//                    //        console.log('get configurable');
+//                    //        return configurable
+//                    //    },
+//                    //    set : function(value){
+//                    //        console.log('set configurable');
+//                    //        configurable    = value
+//                    //    }
+//                    //});
+//                    //console.log(descriptor);
+//                    Object.defineProperty(observableArray,i,descriptor);//[i]
+//                    //notice new
+//                    callback.call(observableArray,{
+//                        "name"      : Number(i),
+//                        "object"    : observableArray,
+//                        "type"      : "new",
+//                        "value"     : value
+//                    })
+//                },
+//                enumerable      : false,
+//                configurable    : false
+//            });
+//
+//        }, MAX);
+//        //console.timeEnd('[i]')
+//        //for(var i= 0; i<MAX; i++){
+//        //    (function(i){
+//        //        Object.defineProperty(self,i,{//[i]
+//        //            get: function(){
+//        //                return _array[i];
+//        //            },
+//        //            set: function(value){//fallback to trigger new
+//        //                console.log('new',this)
+//        //                //fire new
+//        //                _array[i] = value;
+//        //            }
+//        //        });
+//        //    })(i)
+//        //}
+//    }
+//    //observable Array
+//    function ObservableArray(){}
+//    //prototype chain
+//    ObservableArrayPrototype.prototype      = Array.prototype;
+//    ObservableArrayPrototype.Constructor    = ObservableArrayPrototype;
+//    ObservableArray.prototype               = new ObservableArrayPrototype;
+//    ObservableArray.constructor             = ObservableArray;
+//    //replace origin array with observable Array
+//    obj[prop]   = new ObservableArray(obj[prop],callback);
+//}
+//var obj = {
+//    arr     : [],
+//    arr2    : []
+//}
+//ArrayObserve(obj, 'arr', function(change){
+//    console.log(change)
+//});
+//obj.arr.unshift('1: unshift');
+//obj.arr.push('2: push');
+//setTimeout(function(){
+//    obj.arr.pop()
+//},3000)
+////delete obj.arr[0];
+//var descriptor  = {
+//    get: function(){
+//        console.log('get');
+//    },
+//    set: function(){
+//        console.log('set');
+//    }
+//};
+//var _value = false;
+//Object.defineProperty(descriptor, 'configurable', {
+//    get: function(){
+//        console.log('get configurable');
+//        return _value;
+//    },
+//    set: function(value){
+//        console.log('set configurable');
+//        _value  = value;
+//    },
+//    configurable    : true
+//});
+//console.log(descriptor);
+//Object.defineProperty(obj.arr2, '0', descriptor);
+//obj.arr2[0] = 33;
+//var a = {
+//    a1:0,
+//    a2:0,
+//    a3:0,
+//    a4:0,
+//    a5:0,
+//    a6:0,
+//    a7:0
+//};
+//var len =10;
+//while(len--){
+//    (function(prop){
+//        Object.defineProperty(a, prop, {
+//            get : function(){
+//                console.log(this,prop);
+//            },
+//            set : function(value){
+//                console.log(this,prop);
+//            }
+//        });
+//    })(len);
+//}
+//a[0]= 'test';
+//a[1]= 'test';
 </script>
 </body>
 </html>
