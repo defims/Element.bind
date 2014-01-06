@@ -98,33 +98,36 @@ function addPropertyChangeListener(obj, prop, callback){
     subscribers = watcher.subscribers;
     subscribers.push(callback);
 
-    var _obj    = {};
-    _obj[prop]  = obj[prop];
-    Object.defineProperty(_obj,prop,Object.getOwnPropertyDescriptor(obj, prop));
-    Object.defineProperty(obj, prop, {
-        get : function(){
-            return _obj[prop];
-        },
-        set : function(value){
-            _obj[prop] = value;
-            if( Object.prototype.toString.call( value ) === '[object Array]' ){//watch array
-                ArrayObserve(obj, prop, function(change){//detect change obj[prop].* = *
-                    console.log('change: ',change)
-                    len     = subscribers.length;
-                    while(len-->0) subscribers[len].call(this);
-                })
+    if(obj && prop != undefined){
+        var _obj    = {};
+        _obj[prop]  = obj[prop];
+        try{
+            Object.defineProperty(_obj,prop,Object.getOwnPropertyDescriptor(obj, prop));
+        }catch(e){}
+        Object.defineProperty(obj, prop, {
+            get : function(){
+                return _obj[prop];
+            },
+            set : function(value){
+                _obj[prop] = value;
+                if( Object.prototype.toString.call( value ) === '[object Array]' ){//watch array
+                    ArrayObserve(obj, prop, function(change){//detect change obj[prop].* = *
+                        len     = subscribers.length;
+                        while(len-->0) subscribers[len].call(this);
+                    })
+                }
+                len     = subscribers.length;
+                while(len-->0) subscribers[len].call(this);
             }
-            len     = subscribers.length;
-            while(len-->0) subscribers[len].call(this);
+        })
+        //first array watch
+        if( Object.prototype.toString.call(obj[prop]) === '[object Array]' ){//watch array
+            //replace obj[prop] with observable array will cause a obj[prop] set
+            ArrayObserve(obj, prop, function(change){//detect change obj[prop].* = *
+                len     = subscribers.length;
+                while(len-->0) subscribers[len].call(this);
+            });
         }
-    })
-    //first array watch
-    if( Object.prototype.toString.call(obj[prop]) === '[object Array]' ){//watch array
-        //replace obj[prop] with observable array will cause a obj[prop] set
-        ArrayObserve(obj, prop, function(change){//detect change obj[prop].* = *
-            len     = subscribers.length;
-            while(len-->0) subscribers[len].call(this);
-        });
     }
 }
 /**/
@@ -306,7 +309,7 @@ function ElementBindCore(element, binding, scope){
             prop    = objProp.property;
             //provide a method for element to change object property
             //can change to get: item.value() , set: item.value(value)
-            ;(function(obj, prop, element, binding, render){
+            if(obj && prop != undefined)(function(obj, prop, element, binding, render){
                 Object.defineProperty(item, 'value', {
                     get : function(){ return obj[prop] },
                     set : function(value){//set binding.value --> set property --> property change
@@ -543,7 +546,6 @@ var attributes  = directives.attributes;
  * @about   render means set something to dom
  * */
 attributes.render = function(binding){
-    console.log(binding)
     var directiveInfo   = binding.directiveInfo,
         attribute       = directiveInfo[0],
         element         = this,
@@ -610,14 +612,13 @@ var dataset = directives.dataset;
  * @about   render means set something to dom
  * */
 dataset.render = function(binding){
-    console.log(binding)
     var directiveInfo   = binding.directiveInfo,
         dLen            = directiveInfo.length,
         element         = this,
         key             = directiveInfo[0],
         i;
     for(i=1; i<dLen; i++)  key += '-'+directiveInfo[i];
-    element.setAttribute(key, ElementBind.utility.templateArray2String(binding.template.parsed))
+    element.setAttribute('data-'+key, ElementBind.utility.templateArray2String(binding.template.parsed))
 }
 
 
@@ -631,7 +632,6 @@ var event   = directives.event;
  * @about   render means set something to dom,
  * */
 event.render = function(binding){
-    console.log(binding)
     var element         = this,
         event           = binding.directiveInfo[0],
         model           = binding.model,
