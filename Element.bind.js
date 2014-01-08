@@ -97,8 +97,7 @@ function addPropertyChangeListener(obj, prop, callback){
     }
     subscribers = watcher.subscribers;
     subscribers.push(callback);
-
-    if(obj && prop != undefined){
+    if(obj && prop != undefined && prop+'' != 'NaN'){
         var _obj    = {};
         _obj[prop]  = obj[prop];
         try{
@@ -118,7 +117,8 @@ function addPropertyChangeListener(obj, prop, callback){
                 }
                 len     = subscribers.length;
                 while(len-->0) subscribers[len].call(this);
-            }
+            },
+            configurable: true
         })
         //first array watch
         if( Object.prototype.toString.call(obj[prop]) === '[object Array]' ){//watch array
@@ -202,88 +202,6 @@ function hang2Scope( scope, elementPath, binding ){
     }
 }
 /*
- *  = path2Array
- *  @param  path        {String}
- *  @return pathArray   {Array}
- * */
-function path2Array(path){
-    return path.replace(/^\[/g,'').replace(/\[/g,'.').replace(/\]/g,'').split('.');
-}
-/*
- *  = parsePropertyPathItem
- *  @param data {String}
- *  @return
- * */
-function parsePropertyPathItem(scope, item){
-    //handle sign
-    if(item == '$index'){
-        return Number(scope.index);//todo
-    }else{
-        return item;
-    }
-}
-/*
- *  = getObjectProperty
- *  @param  object          {Object}
- *  @param  path            {String}
- *  @this   element         {Element}
- *  @return objectProperty  {Object}
- * */
-function getObjectProperty( scope, object, path ){
-    var pathArr = path2Array(path),
-        prop    = parsePropertyPathItem(scope, pathArr.pop());
-    while(pathArr.length) object  = object[parsePropertyPathItem(scope, pathArr.shift())];
-    return {
-        object      : object,
-        property    : prop
-    }
-}
-/*
- * = TemplateItem
- * @param   str             {String}
- * @return  templateItem    {Object}
- * */
-function TemplateItem(str){
-    return {
-        isTemplateItem  : true,
-        template        : str,
-        value           : ''
-    }
-}
-/*
- * = Template Constructor
- * @param   str     {String}
- * @member  origin  {String}
- * @member  data    {Array}
- * */
-function Template(str){
-    this.origin = str;
-
-    var len     = str.length,
-        parsed  = [],
-        item    = '',
-        isIn    = false,
-        letter;
-    while(len--){
-        letter  = str[len];
-        if(isIn && letter == '{' && str[len-1] == '{'){//out
-            len--;
-            if(item) parsed.unshift( new TemplateItem(item) );
-            item    = '';
-            isIn    = false;
-        }else if(!isIn && letter == '}' && str[len-1] == '}'){//in
-            len--;
-            if(item) parsed.unshift(item);
-            item    = '';
-            isIn    = true;
-        }else{
-            item    = letter + item;
-        }
-    }
-    this.parsed  = parsed;
-}
-//console.log(new Template('{{hi}} i am {{name}}'));
-/*
  * =ElementBindCore
  * */
 function ElementBindCore(element, binding, scope){
@@ -304,7 +222,7 @@ function ElementBindCore(element, binding, scope){
     while(tplLen--){
         item    = tplArr[tplLen];
         if(item.isTemplateItem){//for each template item
-            objProp = getObjectProperty(scope, model, item.template);
+            objProp = ElementBind.utility.getObjectProperty(scope, model, item.template);
             obj     = objProp.object;
             prop    = objProp.property;
             //provide a method for element to change object property
@@ -338,7 +256,7 @@ function ElementBindPrototype( elements, directive, object, template){
     //handle elements
     if(!elements.length) elements = [elements];
     //handle coreDirective
-    directiveArr    = path2Array(directive);
+    directiveArr    = utility.path2Array(directive);
     directiveType   = directiveArr.shift();
     //if relative
     if(!template){
@@ -366,13 +284,12 @@ function ElementBindPrototype( elements, directive, object, template){
         ElementBindScope    = element.ElementBindScope;
         if(!ElementBindScope.bindings) ElementBindScope.bindings    = [];
         //template
-        parseTemplate = new Template(template||'');
+        parsedTemplate = new ElementBind.utility.Template(template||'');
         //binding
         binding = {
             "directiveType" : directiveType,
             "directiveInfo" : directiveArr,
-            "element"       : element,
-            "template"      : parseTemplate,
+            "template"      : parsedTemplate,
             "model"         : model
         }
         ElementBindScope.bindings.push(binding);
@@ -480,7 +397,88 @@ utility.bindChildren    = function(scope, element){
         }
     }
 }
+/*
+ * = TemplateItem
+ * @param   str             {String}
+ * @return  templateItem    {Object}
+ * */
+utility.TemplateItem    = function(str){
+    return {
+        isTemplateItem  : true,
+        template        : str,
+        value           : ''
+    }
+}
+/*
+ * = Template Constructor
+ * @param   str     {String}
+ * @member  origin  {String}
+ * @member  data    {Array}
+ * */
+utility.Template        = function(str){
+    this.origin = str;
 
+    var len     = str.length,
+        parsed  = [],
+        item    = '',
+        isIn    = false,
+        letter;
+    while(len--){
+        letter  = str[len];
+        if(isIn && letter == '{' && str[len-1] == '{'){//out
+            len--;
+            if(item) parsed.unshift( new utility.TemplateItem(item) );
+            item    = '';
+            isIn    = false;
+        }else if(!isIn && letter == '}' && str[len-1] == '}'){//in
+            len--;
+            if(item) parsed.unshift(item);
+            item    = '';
+            isIn    = true;
+        }else{
+            item    = letter + item;
+        }
+    }
+    this.parsed  = parsed;
+}
+//console.log(new Template('{{hi}} i am {{name}}'));
+/*
+ *  = path2Array
+ *  @param  path        {String}
+ *  @return pathArray   {Array}
+ * */
+utility.path2Array      = function(path){
+    return path.replace(/^\[/g,'').replace(/\[/g,'.').replace(/\]/g,'').split('.');
+}
+/*
+ *  = parsePropertyPathItem
+ *  @param data {String}
+ *  @return
+ * */
+utility.parsePropertyPathItem   = function(scope, item){
+    //handle sign
+    if(item == '$index'){
+        return Number(scope.index);//todo
+    }else{
+        return item;
+    }
+}
+/*
+ *  = getObjectProperty
+ *  @param  object          {Object}
+ *  @param  path            {String}
+ *  @this   element         {Element}
+ *  @return objectProperty  {Object}
+ * */
+utility.getObjectProperty   = function( scope, object, path ){
+    var pathArr = utility.path2Array(path),
+        prop    = utility.parsePropertyPathItem(scope, pathArr.pop());
+    while(pathArr.length) object  = object[utility.parsePropertyPathItem(scope, pathArr.shift())];
+    return {
+        object      : object,
+        property    : prop
+    }
+}
 /*
  * =directive
  * */
@@ -498,7 +496,7 @@ var textContent = directives.textContent;
  *  @param      binding     {Object}
  *  @this       element     {Element}
  * */
-textContent.render  = function(binding){
+textContent.render  = function(binding){//node to node match
     var element             = this,
         textContent         = ElementBind.utility.templateArray2String(binding.template.parsed);
     if(element.textContent != textContent){//only if really different value will cause textContent change, otherwise will be a circle change.
@@ -682,9 +680,9 @@ var repeat  = directives.repeat;
  * */
 repeat.render   = function(binding){
     var element         = this,
-        scope           = element.ElementBindScope,
-        array           = binding.template.parsed[0].value,
-        len             = array.length,
+        scope           = element.ElementBindScope || {},
+        array           = binding.template.parsed[0].value || {},
+        len             = array.length || 0,
         scope,instances,tempElement,i,lastInstance;
     if(!scope.index) scope.index = 0;
     if(!scope.instances) scope.instances    = [];
