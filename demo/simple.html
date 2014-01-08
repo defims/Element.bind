@@ -1,6 +1,6 @@
 <!doctype html>
 <head>
-    <script src="../../DefineProperty.polyfill/defineProperty.polyfill.js"></script>
+    <script src="../../DefineProperty.polyfill/DefineProperty.polyfill.js"></script>
     <script src="../../Array.observe/Array.observe.js"></script>
     <script src="../Element.bind.js"></script>
 </head>
@@ -150,11 +150,11 @@ how can i solve the circle dead loop?
  * @about   most usable directive, {{}} need for template parse, object is the scope of template,
  *          if it's undefined , it will search the parent element, top is window.
  * @usage   ElementBind(element(s), 'directive', pathScope, 'template');
- *
-ElementBind($('#textContent'), 'textContent', data, '{{textContent.path[0].to[0].value}}');
+ */
+//ElementBind($('#textContent'), 'textContent', data, '{{textContent.path[0].to[0].value}}');
 ElementBind($('#textContent1'), 'textContent', data.textContent, '{{a}} and {{b}} is result');
-ElementBind($('#textContent2'), 'textContent', data.textContent.path[0], '{{to[0].value}}');
-ElementBind($('#textContent3'), 'textContent', data.textContent.path[0].to[0], '{{value}}');
+//ElementBind($('#textContent2'), 'textContent', data.textContent.path[0], '{{to[0].value}}');
+//ElementBind($('#textContent3'), 'textContent', data.textContent.path[0].to[0], '{{value}}');
 /**/
 
 
